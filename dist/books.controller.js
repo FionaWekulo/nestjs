@@ -12,8 +12,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BooksController = void 0;
+exports.TenantBooksController = exports.ApiBooksController = exports.BooksController = void 0;
 const common_1 = require("@nestjs/common");
+const rxjs_1 = require("rxjs");
+const operators_1 = require("rxjs/operators");
 let BooksController = class BooksController {
     books = [
         { id: 1, title: "NestJS Basics", author: "John Doe", price: 29.99 },
@@ -181,15 +183,21 @@ let BooksController = class BooksController {
         };
     }
     async getBookCountAsync() {
-        const count = await new Promise(resolve => {
+        const count = await new Promise((resolve) => {
             setTimeout(() => {
                 resolve(this.books.length);
             }, 100);
         });
         return {
             totalBooks: count,
-            message: 'This data was fetched asynchronously using a Promise'
+            message: "This data was fetched asynchronously using a Promise",
         };
+    }
+    getBookStream() {
+        return (0, rxjs_1.from)(this.books).pipe((0, operators_1.delay)(500), (0, operators_1.map)((book) => ({
+            ...book,
+            price: book.price ? `$${book.price}` : "Not available",
+        })));
     }
     findOne(id) {
         return this.books.find((book) => book.id === Number(id));
@@ -315,11 +323,17 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "getBookReview", null);
 __decorate([
-    (0, common_1.Get)('async-example'),
+    (0, common_1.Get)("async-example"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "getBookCountAsync", null);
+__decorate([
+    (0, common_1.Get)("observable-example"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", rxjs_1.Observable)
+], BooksController.prototype, "getBookStream", null);
 __decorate([
     (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Param)("id")),
@@ -354,4 +368,56 @@ __decorate([
 exports.BooksController = BooksController = __decorate([
     (0, common_1.Controller)("books")
 ], BooksController);
+let ApiBooksController = class ApiBooksController {
+    books = [
+        { id: 1, title: "NestJS Basics", author: "John Doe", price: 29.99 },
+        { id: 2, title: "TypeScript 101", author: "Jane Smith", price: 24.99 },
+    ];
+    getAllBooks() {
+        return {
+            version: "v1",
+            data: this.books,
+        };
+    }
+};
+exports.ApiBooksController = ApiBooksController;
+__decorate([
+    (0, common_1.Get)("books"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ApiBooksController.prototype, "getAllBooks", null);
+exports.ApiBooksController = ApiBooksController = __decorate([
+    (0, common_1.Controller)({ host: "api.localhost" })
+], ApiBooksController);
+let TenantBooksController = class TenantBooksController {
+    tenantData = {
+        acme: [
+            { id: 101, title: "ACME Guide to Products", author: "Wile E. Coyote" },
+        ],
+        globex: [
+            { id: 201, title: "Globex Corporate Manual", author: "Hank Scorpio" },
+        ],
+    };
+    getTenantBooks(tenant) {
+        if (!this.tenantData[tenant]) {
+            throw new common_1.HttpException(`Tenant "${tenant}" not found`, common_1.HttpStatus.NOT_FOUND);
+        }
+        return {
+            tenant,
+            books: this.tenantData[tenant],
+        };
+    }
+};
+exports.TenantBooksController = TenantBooksController;
+__decorate([
+    (0, common_1.Get)("books"),
+    __param(0, (0, common_1.HostParam)("tenant")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TenantBooksController.prototype, "getTenantBooks", null);
+exports.TenantBooksController = TenantBooksController = __decorate([
+    (0, common_1.Controller)({ host: ":tenant.localhost" })
+], TenantBooksController);
 //# sourceMappingURL=books.controller.js.map

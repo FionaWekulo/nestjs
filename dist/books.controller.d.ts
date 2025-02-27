@@ -1,5 +1,6 @@
 import { HttpStatus } from "@nestjs/common";
 import { Request } from "express";
+import { Observable } from "rxjs";
 export declare class BooksController {
     private books;
     findAll(): {
@@ -102,6 +103,7 @@ export declare class BooksController {
         content: string;
     };
     getBookCountAsync(): Promise<any>;
+    getBookStream(): Observable<any>;
     findOne(id: string): {
         id: number;
         title: string;
@@ -118,5 +120,24 @@ export declare class BooksController {
             author: string;
             price?: number;
         };
+    };
+}
+export declare class ApiBooksController {
+    private books;
+    getAllBooks(): {
+        version: string;
+        data: {
+            id: number;
+            title: string;
+            author: string;
+            price: number;
+        }[];
+    };
+}
+export declare class TenantBooksController {
+    private tenantData;
+    getTenantBooks(tenant: string): {
+        tenant: string;
+        books: any;
     };
 }

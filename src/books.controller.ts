@@ -15,11 +15,11 @@ import {
   Patch,
   Header,
   Redirect,
-  HostParam
+  HostParam,
 } from "@nestjs/common";
 import { Request } from "express"; // Import Express Request type
-import { Observable, of, from } from 'rxjs';
-import { map, delay } from 'rxjs/operators';
+import { Observable, of, from } from "rxjs";
+import { map, delay } from "rxjs/operators";
 
 // The @Controller decorator marks this class as a controller
 // 'books' is the route prefix - all routes in this controller will start with /books
@@ -327,22 +327,40 @@ export class BooksController {
   // # Test multiple parameters
   // curl http://localhost:3000/books/2/reviews/5
 
-
   // Example of an async method using Promises
-  @Get('async-example')
+  @Get("async-example")
   async getBookCountAsync(): Promise<any> {
     // Simulate an async operation (like a database query)
-    const count = await new Promise(resolve => {
+    const count = await new Promise((resolve) => {
       setTimeout(() => {
         resolve(this.books.length);
       }, 100);
     });
-    
+
     return {
       totalBooks: count,
-      message: 'This data was fetched asynchronously using a Promise'
+      message: "This data was fetched asynchronously using a Promise",
     };
   }
+
+  // Example of an Observable stream
+  @Get("observable-example")
+  getBookStream(): Observable<any> {
+    // Create an observable that emits our books one by one with a delay
+    return from(this.books).pipe(
+      delay(500), // Add a delay to simulate network latency
+      map((book) => ({
+        ...book,
+        price: book.price ? `$${book.price}` : "Not available",
+      }))
+    );
+  }
+
+  //   # Test the async example
+  // curl http://localhost:3000/books/async-example
+
+  // # Test the observable example (you'll receive one response)
+  // curl http://localhost:3000/books/observable-example
 
   // @Get(':id') creates a route with a parameter
   // This handles requests like GET /books/1 or /books/2
@@ -458,4 +476,50 @@ export class BooksController {
 
   // # Update a book (should return 200 OK with updated book)
   // curl -X PATCH http://localhost:3000/books/2 -H "Content-Type: application/json" -d '{"price":39.99}'
+}
+
+// Special subdomain controller for the API
+@Controller({ host: "api.localhost" })
+export class ApiBooksController {
+  private books = [
+    { id: 1, title: "NestJS Basics", author: "John Doe", price: 29.99 },
+    { id: 2, title: "TypeScript 101", author: "Jane Smith", price: 24.99 },
+  ];
+
+  @Get("books")
+  getAllBooks() {
+    return {
+      version: "v1",
+      data: this.books,
+    };
+  }
+}
+
+// Dynamic subdomain controller for tenants
+@Controller({ host: ":tenant.localhost" })
+export class TenantBooksController {
+  private tenantData = {
+    acme: [
+      { id: 101, title: "ACME Guide to Products", author: "Wile E. Coyote" },
+    ],
+    globex: [
+      { id: 201, title: "Globex Corporate Manual", author: "Hank Scorpio" },
+    ],
+  };
+
+  @Get("books")
+  getTenantBooks(@HostParam("tenant") tenant: string) {
+    // Check if the tenant exists
+    if (!this.tenantData[tenant]) {
+      throw new HttpException(
+        `Tenant "${tenant}" not found`,
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    return {
+      tenant,
+      books: this.tenantData[tenant],
+    };
+  }
 }
