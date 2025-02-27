@@ -136,15 +136,49 @@ let BooksController = class BooksController {
     redirectToExternalStore(id, vendor) {
         const book = this.books.find((b) => b.id === Number(id));
         if (!book) {
-            throw new common_1.HttpException('Book not found', common_1.HttpStatus.NOT_FOUND);
+            throw new common_1.HttpException("Book not found", common_1.HttpStatus.NOT_FOUND);
         }
-        if (vendor === 'amazon') {
-            return { url: `https://amazon.com/books/search?title=${encodeURIComponent(book.title)}` };
+        if (vendor === "amazon") {
+            return {
+                url: `https://amazon.com/books/search?title=${encodeURIComponent(book.title)}`,
+            };
         }
-        else if (vendor === 'barnes') {
-            return { url: `https://barnesandnoble.com/search?title=${encodeURIComponent(book.title)}` };
+        else if (vendor === "barnes") {
+            return {
+                url: `https://barnesandnoble.com/search?title=${encodeURIComponent(book.title)}`,
+            };
         }
-        return { url: `https://books.com/search?q=${encodeURIComponent(book.title)}` };
+        return {
+            url: `https://books.com/search?q=${encodeURIComponent(book.title)}`,
+        };
+    }
+    getBookDetails(id) {
+        const bookId = Number(id);
+        if (isNaN(bookId)) {
+            throw new common_1.HttpException("Invalid ID format. Must be a number", common_1.HttpStatus.BAD_REQUEST);
+        }
+        const book = this.books.find((b) => b.id === bookId);
+        if (!book) {
+            throw new common_1.HttpException(`Book with ID ${id} not found`, common_1.HttpStatus.NOT_FOUND);
+        }
+        return {
+            message: `Details for book #${id}`,
+            book,
+            links: {
+                collection: "/books",
+                reviews: `/books/${id}/reviews`,
+                similar: `/books/similar?author=${encodeURIComponent(book.author)}`,
+            },
+        };
+    }
+    getBookReview(bookId, reviewId) {
+        return {
+            bookId: Number(bookId),
+            reviewId: Number(reviewId),
+            author: "Jane Reader",
+            rating: 4.5,
+            content: "This book was excellent! Highly recommended.",
+        };
     }
     findOne(id) {
         return this.books.find((book) => book.id === Number(id));
@@ -239,21 +273,36 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "getPopularBooks", null);
 __decorate([
-    (0, common_1.Get)('store'),
-    (0, common_1.Redirect)('https://amazon.com/books', 302),
+    (0, common_1.Get)("store"),
+    (0, common_1.Redirect)("https://amazon.com/books", 302),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "redirectToStore", null);
 __decorate([
-    (0, common_1.Get)('external/:id'),
-    (0, common_1.Redirect)('https://amazon.com/books', 302),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Query)('vendor')),
+    (0, common_1.Get)("external/:id"),
+    (0, common_1.Redirect)("https://amazon.com/books", 302),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Query)("vendor")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "redirectToExternalStore", null);
+__decorate([
+    (0, common_1.Get)(":id/details"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "getBookDetails", null);
+__decorate([
+    (0, common_1.Get)(":id/reviews/:reviewId"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Param)("reviewId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "getBookReview", null);
 __decorate([
     (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Param)("id")),

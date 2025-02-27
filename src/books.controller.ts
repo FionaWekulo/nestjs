@@ -196,8 +196,7 @@ export class BooksController {
     return docs[path] || { message: "Documentation page not found" };
   }
 
-
-    // Example using the @Header decorator to set cache control
+  // Example using the @Header decorator to set cache control
   // Make sure you're returning data from your popular books endpoint
   @Get("popular")
   @Header("Cache-Control", "public, max-age=300")
@@ -214,38 +213,116 @@ export class BooksController {
     };
   }
 
-   // Example of redirect with @Redirect decorator
-   @Get('store')
-   @Redirect('https://amazon.com/books', 302)
-   redirectToStore() {
-     // This function doesn't need to return anything,
-     // since the redirect is handled by the decorator
-   }
+  // Example of redirect with @Redirect decorator
+  @Get("store")
+  @Redirect("https://amazon.com/books", 302)
+  redirectToStore() {
+    // This function doesn't need to return anything,
+    // since the redirect is handled by the decorator
+  }
 
-   // Example of dynamic redirect based on query parameter
-  @Get('external/:id')
-  @Redirect('https://amazon.com/books', 302)
+  // Example of dynamic redirect based on query parameter
+  @Get("external/:id")
+  @Redirect("https://amazon.com/books", 302)
   redirectToExternalStore(
-    @Param('id') id: string,
-    @Query('vendor') vendor?: string
+    @Param("id") id: string,
+    @Query("vendor") vendor?: string
   ) {
     // Find the book
     const book = this.books.find((b) => b.id === Number(id));
-    
+
     if (!book) {
-      throw new HttpException('Book not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("Book not found", HttpStatus.NOT_FOUND);
     }
-    
+
     // Dynamic redirect based on vendor query parameter
-    if (vendor === 'amazon') {
-      return { url: `https://amazon.com/books/search?title=${encodeURIComponent(book.title)}` };
-    } else if (vendor === 'barnes') {
-      return { url: `https://barnesandnoble.com/search?title=${encodeURIComponent(book.title)}` };
+    if (vendor === "amazon") {
+      return {
+        url: `https://amazon.com/books/search?title=${encodeURIComponent(book.title)}`,
+      };
+    } else if (vendor === "barnes") {
+      return {
+        url: `https://barnesandnoble.com/search?title=${encodeURIComponent(book.title)}`,
+      };
     }
-    
+
     // Default redirect if no vendor specified or unknown vendor
-    return { url: `https://books.com/search?q=${encodeURIComponent(book.title)}` };
+    return {
+      url: `https://books.com/search?q=${encodeURIComponent(book.title)}`,
+    };
   }
+
+  // Enhanced route parameter example with validation
+  @Get(":id/details")
+  getBookDetails(@Param("id") id: string) {
+    const bookId = Number(id);
+
+    // Validate the ID is a number
+    if (isNaN(bookId)) {
+      throw new HttpException(
+        "Invalid ID format. Must be a number",
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    const book = this.books.find((b) => b.id === bookId);
+
+    if (!book) {
+      throw new HttpException(
+        `Book with ID ${id} not found`,
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    return {
+      message: `Details for book #${id}`,
+      book,
+      links: {
+        collection: "/books",
+        reviews: `/books/${id}/reviews`,
+        similar: `/books/similar?author=${encodeURIComponent(book.author)}`,
+      },
+    };
+  }
+
+  // Example showing multiple params in a single route
+  @Get(":id/reviews/:reviewId")
+  getBookReview(
+    @Param("id") bookId: string,
+    @Param("reviewId") reviewId: string
+  ) {
+    // Here you would normally fetch a specific review for a specific book
+    // For demonstration purposes, we'll just return mock data
+    return {
+      bookId: Number(bookId),
+      reviewId: Number(reviewId),
+      author: "Jane Reader",
+      rating: 4.5,
+      content: "This book was excellent! Highly recommended.",
+    };
+  }
+
+  //   # Get popular books (note the Cache-Control header in the response)
+  // curl -v http://localhost:3000/books/popular
+
+  // # Test a redirect to store
+  // curl -v http://localhost:3000/books/store
+
+  // # Test dynamic redirects with different vendors
+  // curl -v http://localhost:3000/books/external/1?vendor=amazon
+  // curl -v http://localhost:3000/books/external/1?vendor=barnes
+
+  // # Get book details with route parameter
+  // curl http://localhost:3000/books/1/details
+
+  // # Test with invalid ID format
+  // curl http://localhost:3000/books/abc/details
+
+  // # Test with non-existent book ID
+  // curl http://localhost:3000/books/999/details
+
+  // # Test multiple parameters
+  // curl http://localhost:3000/books/2/reviews/5
 
   // @Get(':id') creates a route with a parameter
   // This handles requests like GET /books/1 or /books/2
@@ -361,6 +438,4 @@ export class BooksController {
 
   // # Update a book (should return 200 OK with updated book)
   // curl -X PATCH http://localhost:3000/books/2 -H "Content-Type: application/json" -d '{"price":39.99}'
-
-
 }

@@ -80,6 +80,27 @@ export declare class BooksController {
     redirectToExternalStore(id: string, vendor?: string): {
         url: string;
     };
+    getBookDetails(id: string): {
+        message: string;
+        book: {
+            id: number;
+            title: string;
+            author: string;
+            price?: number;
+        };
+        links: {
+            collection: string;
+            reviews: string;
+            similar: string;
+        };
+    };
+    getBookReview(bookId: string, reviewId: string): {
+        bookId: number;
+        reviewId: number;
+        author: string;
+        rating: number;
+        content: string;
+    };
     findOne(id: string): {
         id: number;
         title: string;
