@@ -1,0 +1,196 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BooksController = void 0;
+const common_1 = require("@nestjs/common");
+let BooksController = class BooksController {
+    books = [
+        { id: 1, title: 'NestJS Basics', author: 'John Doe', price: 29.99 },
+        { id: 2, title: 'TypeScript 101', author: 'Jane Smith', price: 24.99 },
+    ];
+    findAll() {
+        return this.books;
+    }
+    getWithRequestObject(request) {
+        console.log(request.url);
+        console.log(request.method);
+        console.log(request.headers);
+        console.log(request.query);
+        return {
+            message: 'Accessing the full request object',
+            requestedUrl: request.url,
+            method: request.method,
+            userAgent: request.headers['user-agent'],
+        };
+    }
+    filterBooks(queryParams) {
+        console.log('Filter endpoint hit!');
+        console.log('Query params:', queryParams);
+        let filteredBooks = [...this.books];
+        if (queryParams.author) {
+            filteredBooks = filteredBooks.filter((book) => book.author.toLowerCase().includes(queryParams.author.toLowerCase()));
+        }
+        if (queryParams.minPrice) {
+            const minPrice = parseFloat(queryParams.minPrice);
+            filteredBooks = filteredBooks.filter((book) => book.price !== undefined && book.price >= minPrice);
+        }
+        return {
+            message: 'Books filtered by query parameters',
+            queryUsed: queryParams,
+            results: filteredBooks,
+        };
+    }
+    searchBooks(title) {
+        console.log('Search endpoint hit!');
+        console.log('Title query:', title);
+        if (!title) {
+            return this.books;
+        }
+        const results = this.books.filter((book) => book.title.toLowerCase().includes(title.toLowerCase()));
+        return {
+            message: `Search results for title: ${title}`,
+            results,
+        };
+    }
+    getWithHeaders(headers, userAgent) {
+        return {
+            message: 'Accessing HTTP headers',
+            allHeaders: headers,
+            specificHeader: userAgent,
+        };
+    }
+    compareBooks(id1, id2) {
+        const book1 = this.books.find((book) => book.id === Number(id1));
+        const book2 = this.books.find((book) => book.id === Number(id2));
+        if (!book1 || !book2) {
+            return {
+                status: common_1.HttpStatus.NOT_FOUND,
+                message: 'One or both books not found',
+            };
+        }
+        return {
+            message: 'Book comparison',
+            book1,
+            book2,
+            priceDifference: (book1.price || 0) - (book2.price || 0),
+        };
+    }
+    getApiDocs(docPath) {
+        console.log('DOCS ENDPOINT HIT');
+        console.log('Doc path parameter:', docPath);
+        const path = docPath || 'index';
+        console.log('Documentation path requested:', path);
+        const docs = {
+            'index': {
+                title: 'Books API Documentation',
+                sections: ['Getting Started', 'Authentication', 'Endpoints'],
+                links: ['/books/docs/getting-started', '/books/docs/auth', '/books/docs/endpoints']
+            },
+            'getting-started': {
+                title: 'Getting Started with Books API',
+                content: 'This is the getting started guide for using the Books API...'
+            },
+            'endpoints': {
+                title: 'API Endpoints',
+                content: 'The Books API provides the following endpoints...',
+                endpoints: [
+                    { method: 'GET', path: '/books', description: 'Get all books' },
+                    { method: 'GET', path: '/books/:id', description: 'Get a book by ID' },
+                    { method: 'POST', path: '/books', description: 'Create a new book' }
+                ]
+            }
+        };
+        return docs[path] || { message: 'Documentation page not found' };
+    }
+    findOne(id) {
+        return this.books.find((book) => book.id === Number(id));
+    }
+    create(createBookData) {
+        const newBook = {
+            id: this.books.length + 1,
+            ...createBookData,
+        };
+        this.books.push(newBook);
+        return newBook;
+    }
+};
+exports.BooksController = BooksController;
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('request/example'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "getWithRequestObject", null);
+__decorate([
+    (0, common_1.Get)('filter'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "filterBooks", null);
+__decorate([
+    (0, common_1.Get)('search'),
+    __param(0, (0, common_1.Query)('title')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "searchBooks", null);
+__decorate([
+    (0, common_1.Get)('headers'),
+    __param(0, (0, common_1.Headers)()),
+    __param(1, (0, common_1.Headers)('user-agent')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "getWithHeaders", null);
+__decorate([
+    (0, common_1.Get)('compare/:id1/with/:id2'),
+    __param(0, (0, common_1.Param)('id1')),
+    __param(1, (0, common_1.Param)('id2')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "compareBooks", null);
+__decorate([
+    (0, common_1.Get)('docs/*'),
+    __param(0, (0, common_1.Param)('0')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Object)
+], BooksController.prototype, "getApiDocs", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "create", null);
+exports.BooksController = BooksController = __decorate([
+    (0, common_1.Controller)('books')
+], BooksController);
+//# sourceMappingURL=books.controller.js.map
