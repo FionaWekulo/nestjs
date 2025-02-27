@@ -1,5 +1,5 @@
-import { HttpStatus } from '@nestjs/common';
-import { Request } from 'express';
+import { HttpStatus } from "@nestjs/common";
+import { Request } from "express";
 export declare class BooksController {
     private books;
     findAll(): {
@@ -74,4 +74,14 @@ export declare class BooksController {
         price?: number;
     } | undefined;
     create(createBookData: any): any;
+    deleteBook(id: string): void;
+    updateBook(id: string, updateData: any): {
+        message: string;
+        book: {
+            id: number;
+            title: string;
+            author: string;
+            price?: number;
+        };
+    };
 }

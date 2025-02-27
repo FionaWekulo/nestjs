@@ -16,8 +16,8 @@ exports.BooksController = void 0;
 const common_1 = require("@nestjs/common");
 let BooksController = class BooksController {
     books = [
-        { id: 1, title: 'NestJS Basics', author: 'John Doe', price: 29.99 },
-        { id: 2, title: 'TypeScript 101', author: 'Jane Smith', price: 24.99 },
+        { id: 1, title: "NestJS Basics", author: "John Doe", price: 29.99 },
+        { id: 2, title: "TypeScript 101", author: "Jane Smith", price: 24.99 },
     ];
     findAll() {
         return this.books;
@@ -28,15 +28,15 @@ let BooksController = class BooksController {
         console.log(request.headers);
         console.log(request.query);
         return {
-            message: 'Accessing the full request object',
+            message: "Accessing the full request object",
             requestedUrl: request.url,
             method: request.method,
-            userAgent: request.headers['user-agent'],
+            userAgent: request.headers["user-agent"],
         };
     }
     filterBooks(queryParams) {
-        console.log('Filter endpoint hit!');
-        console.log('Query params:', queryParams);
+        console.log("Filter endpoint hit!");
+        console.log("Query params:", queryParams);
         let filteredBooks = [...this.books];
         if (queryParams.author) {
             filteredBooks = filteredBooks.filter((book) => book.author.toLowerCase().includes(queryParams.author.toLowerCase()));
@@ -46,14 +46,14 @@ let BooksController = class BooksController {
             filteredBooks = filteredBooks.filter((book) => book.price !== undefined && book.price >= minPrice);
         }
         return {
-            message: 'Books filtered by query parameters',
+            message: "Books filtered by query parameters",
             queryUsed: queryParams,
             results: filteredBooks,
         };
     }
     searchBooks(title) {
-        console.log('Search endpoint hit!');
-        console.log('Title query:', title);
+        console.log("Search endpoint hit!");
+        console.log("Title query:", title);
         if (!title) {
             return this.books;
         }
@@ -65,7 +65,7 @@ let BooksController = class BooksController {
     }
     getWithHeaders(headers, userAgent) {
         return {
-            message: 'Accessing HTTP headers',
+            message: "Accessing HTTP headers",
             allHeaders: headers,
             specificHeader: userAgent,
         };
@@ -76,53 +76,83 @@ let BooksController = class BooksController {
         if (!book1 || !book2) {
             return {
                 status: common_1.HttpStatus.NOT_FOUND,
-                message: 'One or both books not found',
+                message: "One or both books not found",
             };
         }
         return {
-            message: 'Book comparison',
+            message: "Book comparison",
             book1,
             book2,
             priceDifference: (book1.price || 0) - (book2.price || 0),
         };
     }
     getApiDocs(docPath) {
-        console.log('DOCS ENDPOINT HIT');
-        console.log('Doc path parameter:', docPath);
-        const path = docPath || 'index';
-        console.log('Documentation path requested:', path);
+        console.log("DOCS ENDPOINT HIT");
+        console.log("Doc path parameter:", docPath);
+        const path = docPath || "index";
+        console.log("Documentation path requested:", path);
         const docs = {
-            'index': {
-                title: 'Books API Documentation',
-                sections: ['Getting Started', 'Authentication', 'Endpoints'],
-                links: ['/books/docs/getting-started', '/books/docs/auth', '/books/docs/endpoints']
+            index: {
+                title: "Books API Documentation",
+                sections: ["Getting Started", "Authentication", "Endpoints"],
+                links: [
+                    "/books/docs/getting-started",
+                    "/books/docs/auth",
+                    "/books/docs/endpoints",
+                ],
             },
-            'getting-started': {
-                title: 'Getting Started with Books API',
-                content: 'This is the getting started guide for using the Books API...'
+            "getting-started": {
+                title: "Getting Started with Books API",
+                content: "This is the getting started guide for using the Books API...",
             },
-            'endpoints': {
-                title: 'API Endpoints',
-                content: 'The Books API provides the following endpoints...',
+            endpoints: {
+                title: "API Endpoints",
+                content: "The Books API provides the following endpoints...",
                 endpoints: [
-                    { method: 'GET', path: '/books', description: 'Get all books' },
-                    { method: 'GET', path: '/books/:id', description: 'Get a book by ID' },
-                    { method: 'POST', path: '/books', description: 'Create a new book' }
-                ]
-            }
+                    { method: "GET", path: "/books", description: "Get all books" },
+                    {
+                        method: "GET",
+                        path: "/books/:id",
+                        description: "Get a book by ID",
+                    },
+                    { method: "POST", path: "/books", description: "Create a new book" },
+                ],
+            },
         };
-        return docs[path] || { message: 'Documentation page not found' };
+        return docs[path] || { message: "Documentation page not found" };
     }
     findOne(id) {
         return this.books.find((book) => book.id === Number(id));
     }
     create(createBookData) {
+        if (!createBookData.title || !createBookData.author) {
+            throw new common_1.HttpException("Title and author are required fields", common_1.HttpStatus.BAD_REQUEST);
+        }
         const newBook = {
             id: this.books.length + 1,
             ...createBookData,
         };
         this.books.push(newBook);
         return newBook;
+    }
+    deleteBook(id) {
+        const bookIndex = this.books.findIndex((book) => book.id === Number(id));
+        if (bookIndex === -1) {
+            throw new common_1.HttpException(`Book with ID ${id} not found`, common_1.HttpStatus.NOT_FOUND);
+        }
+        this.books.splice(bookIndex, 1);
+        return;
+    }
+    updateBook(id, updateData) {
+        const book = this.books.find((book) => book.id === Number(id));
+        if (!book) {
+            throw new common_1.HttpException(`Book with ID ${id} not found`, common_1.HttpStatus.NOT_FOUND);
+        }
+        Object.assign(book, updateData);
+        return {
+            message: "Book updated successfully",
+            book,
+        };
     }
 };
 exports.BooksController = BooksController;
@@ -133,64 +163,81 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "findAll", null);
 __decorate([
-    (0, common_1.Get)('request/example'),
+    (0, common_1.Get)("request/example"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "getWithRequestObject", null);
 __decorate([
-    (0, common_1.Get)('filter'),
+    (0, common_1.Get)("filter"),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "filterBooks", null);
 __decorate([
-    (0, common_1.Get)('search'),
-    __param(0, (0, common_1.Query)('title')),
+    (0, common_1.Get)("search"),
+    __param(0, (0, common_1.Query)("title")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "searchBooks", null);
 __decorate([
-    (0, common_1.Get)('headers'),
+    (0, common_1.Get)("headers"),
     __param(0, (0, common_1.Headers)()),
-    __param(1, (0, common_1.Headers)('user-agent')),
+    __param(1, (0, common_1.Headers)("user-agent")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "getWithHeaders", null);
 __decorate([
-    (0, common_1.Get)('compare/:id1/with/:id2'),
-    __param(0, (0, common_1.Param)('id1')),
-    __param(1, (0, common_1.Param)('id2')),
+    (0, common_1.Get)("compare/:id1/with/:id2"),
+    __param(0, (0, common_1.Param)("id1")),
+    __param(1, (0, common_1.Param)("id2")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "compareBooks", null);
 __decorate([
-    (0, common_1.Get)('docs/*'),
-    __param(0, (0, common_1.Param)('0')),
+    (0, common_1.Get)("docs/*"),
+    __param(0, (0, common_1.Param)("0")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Object)
 ], BooksController.prototype, "getApiDocs", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(":id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "create", null);
+__decorate([
+    (0, common_1.Delete)(":id"),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "deleteBook", null);
+__decorate([
+    (0, common_1.Patch)(":id"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "updateBook", null);
 exports.BooksController = BooksController = __decorate([
-    (0, common_1.Controller)('books')
+    (0, common_1.Controller)("books")
 ], BooksController);
 //# sourceMappingURL=books.controller.js.map
