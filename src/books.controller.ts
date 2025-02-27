@@ -13,6 +13,7 @@ import {
   HttpException,
   Delete,
   Patch,
+  Header,
 } from "@nestjs/common";
 import { Request } from "express"; // Import Express Request type
 
@@ -194,6 +195,24 @@ export class BooksController {
     return docs[path] || { message: "Documentation page not found" };
   }
 
+
+    // Example using the @Header decorator to set cache control
+  // Make sure you're returning data from your popular books endpoint
+  @Get("popular")
+  @Header("Cache-Control", "public, max-age=300")
+  getPopularBooks() {
+    // Make sure you're returning something!
+    const popularBooks = this.books
+      .slice()
+      .sort((a, b) => (b.price || 0) - (a.price || 0))
+      .slice(0, 3);
+
+    return {
+      message: "Most popular books",
+      books: popularBooks,
+    };
+  }
+
   // @Get(':id') creates a route with a parameter
   // This handles requests like GET /books/1 or /books/2
   // The ':id' syntax defines a route parameter named 'id'
@@ -294,19 +313,20 @@ export class BooksController {
     };
   }
 
+  //   # Create a book (should return 201 CREATED)
+  // curl -X POST http://localhost:3000/books -H "Content-Type: application/json" -d '{"title":"New Book","author":"New Author"}'
 
-//   # Create a book (should return 201 CREATED)
-// curl -X POST http://localhost:3000/books -H "Content-Type: application/json" -d '{"title":"New Book","author":"New Author"}'
+  // # Try creating a book without required fields (should return 400 BAD REQUEST)
+  // curl -X POST http://localhost:3000/books -H "Content-Type: application/json" -d '{"title":"Incomplete Book"}'
 
-// # Try creating a book without required fields (should return 400 BAD REQUEST)
-// curl -X POST http://localhost:3000/books -H "Content-Type: application/json" -d '{"title":"Incomplete Book"}'
+  // # Delete a book (should return 204 NO CONTENT - no response body)
+  // curl -X DELETE http://localhost:3000/books/1 -v
 
-// # Delete a book (should return 204 NO CONTENT - no response body)
-// curl -X DELETE http://localhost:3000/books/1 -v
+  // # Try deleting a non-existent book (should return 404 NOT FOUND)
+  // curl -X DELETE http://localhost:3000/books/999 -v
 
-// # Try deleting a non-existent book (should return 404 NOT FOUND)
-// curl -X DELETE http://localhost:3000/books/999 -v
+  // # Update a book (should return 200 OK with updated book)
+  // curl -X PATCH http://localhost:3000/books/2 -H "Content-Type: application/json" -d '{"price":39.99}'
 
-// # Update a book (should return 200 OK with updated book)
-// curl -X PATCH http://localhost:3000/books/2 -H "Content-Type: application/json" -d '{"price":39.99}'
+
 }

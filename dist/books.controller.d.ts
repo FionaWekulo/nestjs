@@ -67,6 +67,15 @@ export declare class BooksController {
         status?: undefined;
     };
     getApiDocs(docPath: string): any;
+    getPopularBooks(): {
+        message: string;
+        books: {
+            id: number;
+            title: string;
+            author: string;
+            price?: number;
+        }[];
+    };
     findOne(id: string): {
         id: number;
         title: string;
