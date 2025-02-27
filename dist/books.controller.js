@@ -131,6 +131,8 @@ let BooksController = class BooksController {
             books: popularBooks,
         };
     }
+    redirectToStore() {
+    }
     findOne(id) {
         return this.books.find((book) => book.id === Number(id));
     }
@@ -223,6 +225,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "getPopularBooks", null);
+__decorate([
+    (0, common_1.Get)('store'),
+    (0, common_1.Redirect)('https://amazon.com/books', 302),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "redirectToStore", null);
 __decorate([
     (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Param)("id")),

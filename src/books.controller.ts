@@ -14,6 +14,7 @@ import {
   Delete,
   Patch,
   Header,
+  Redirect,
 } from "@nestjs/common";
 import { Request } from "express"; // Import Express Request type
 
@@ -212,6 +213,14 @@ export class BooksController {
       books: popularBooks,
     };
   }
+
+   // Example of redirect with @Redirect decorator
+   @Get('store')
+   @Redirect('https://amazon.com/books', 302)
+   redirectToStore() {
+     // This function doesn't need to return anything,
+     // since the redirect is handled by the decorator
+   }
 
   // @Get(':id') creates a route with a parameter
   // This handles requests like GET /books/1 or /books/2

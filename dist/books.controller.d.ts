@@ -76,6 +76,7 @@ export declare class BooksController {
             price?: number;
         }[];
     };
+    redirectToStore(): void;
     findOne(id: string): {
         id: number;
         title: string;
