@@ -101,6 +101,7 @@ export declare class BooksController {
         rating: number;
         content: string;
     };
+    getBookCountAsync(): Promise<any>;
     findOne(id: string): {
         id: number;
         title: string;

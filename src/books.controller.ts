@@ -15,8 +15,11 @@ import {
   Patch,
   Header,
   Redirect,
+  HostParam
 } from "@nestjs/common";
 import { Request } from "express"; // Import Express Request type
+import { Observable, of, from } from 'rxjs';
+import { map, delay } from 'rxjs/operators';
 
 // The @Controller decorator marks this class as a controller
 // 'books' is the route prefix - all routes in this controller will start with /books
@@ -323,6 +326,23 @@ export class BooksController {
 
   // # Test multiple parameters
   // curl http://localhost:3000/books/2/reviews/5
+
+
+  // Example of an async method using Promises
+  @Get('async-example')
+  async getBookCountAsync(): Promise<any> {
+    // Simulate an async operation (like a database query)
+    const count = await new Promise(resolve => {
+      setTimeout(() => {
+        resolve(this.books.length);
+      }, 100);
+    });
+    
+    return {
+      totalBooks: count,
+      message: 'This data was fetched asynchronously using a Promise'
+    };
+  }
 
   // @Get(':id') creates a route with a parameter
   // This handles requests like GET /books/1 or /books/2

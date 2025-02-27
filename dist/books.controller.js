@@ -180,6 +180,17 @@ let BooksController = class BooksController {
             content: "This book was excellent! Highly recommended.",
         };
     }
+    async getBookCountAsync() {
+        const count = await new Promise(resolve => {
+            setTimeout(() => {
+                resolve(this.books.length);
+            }, 100);
+        });
+        return {
+            totalBooks: count,
+            message: 'This data was fetched asynchronously using a Promise'
+        };
+    }
     findOne(id) {
         return this.books.find((book) => book.id === Number(id));
     }
@@ -303,6 +314,12 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "getBookReview", null);
+__decorate([
+    (0, common_1.Get)('async-example'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], BooksController.prototype, "getBookCountAsync", null);
 __decorate([
     (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Param)("id")),
