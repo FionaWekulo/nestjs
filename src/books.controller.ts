@@ -222,6 +222,31 @@ export class BooksController {
      // since the redirect is handled by the decorator
    }
 
+   // Example of dynamic redirect based on query parameter
+  @Get('external/:id')
+  @Redirect('https://amazon.com/books', 302)
+  redirectToExternalStore(
+    @Param('id') id: string,
+    @Query('vendor') vendor?: string
+  ) {
+    // Find the book
+    const book = this.books.find((b) => b.id === Number(id));
+    
+    if (!book) {
+      throw new HttpException('Book not found', HttpStatus.NOT_FOUND);
+    }
+    
+    // Dynamic redirect based on vendor query parameter
+    if (vendor === 'amazon') {
+      return { url: `https://amazon.com/books/search?title=${encodeURIComponent(book.title)}` };
+    } else if (vendor === 'barnes') {
+      return { url: `https://barnesandnoble.com/search?title=${encodeURIComponent(book.title)}` };
+    }
+    
+    // Default redirect if no vendor specified or unknown vendor
+    return { url: `https://books.com/search?q=${encodeURIComponent(book.title)}` };
+  }
+
   // @Get(':id') creates a route with a parameter
   // This handles requests like GET /books/1 or /books/2
   // The ':id' syntax defines a route parameter named 'id'

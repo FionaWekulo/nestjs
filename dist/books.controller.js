@@ -133,6 +133,19 @@ let BooksController = class BooksController {
     }
     redirectToStore() {
     }
+    redirectToExternalStore(id, vendor) {
+        const book = this.books.find((b) => b.id === Number(id));
+        if (!book) {
+            throw new common_1.HttpException('Book not found', common_1.HttpStatus.NOT_FOUND);
+        }
+        if (vendor === 'amazon') {
+            return { url: `https://amazon.com/books/search?title=${encodeURIComponent(book.title)}` };
+        }
+        else if (vendor === 'barnes') {
+            return { url: `https://barnesandnoble.com/search?title=${encodeURIComponent(book.title)}` };
+        }
+        return { url: `https://books.com/search?q=${encodeURIComponent(book.title)}` };
+    }
     findOne(id) {
         return this.books.find((book) => book.id === Number(id));
     }
@@ -232,6 +245,15 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], BooksController.prototype, "redirectToStore", null);
+__decorate([
+    (0, common_1.Get)('external/:id'),
+    (0, common_1.Redirect)('https://amazon.com/books', 302),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('vendor')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], BooksController.prototype, "redirectToExternalStore", null);
 __decorate([
     (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Param)("id")),

@@ -77,6 +77,9 @@ export declare class BooksController {
         }[];
     };
     redirectToStore(): void;
+    redirectToExternalStore(id: string, vendor?: string): {
+        url: string;
+    };
     findOne(id: string): {
         id: number;
         title: string;
